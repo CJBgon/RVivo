@@ -14,3 +14,7 @@ LazyData: true
 Depends: data.table
 Imports: ggplot2
 RoxygenNote: 6.1.1
+NeedsCompilation: no
+Packaged: 2019-10-03 15:42:18 UTC; christian
+Author: Christian Bouwens [aut, cre] (<https://orcid.org/0000-0002-5751-0365>)
+Maintainer: Christian Bouwens <c.j.bouwens@gmail.com>
