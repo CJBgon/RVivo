@@ -14,7 +14,7 @@ startpick <- function(data = micemat , weight = 90){
   for (row in seq_along(1:nrow(dat))) {
     startdate[row] <- colnames(dat)[which(dat[row, ] >= 90,
                                           arr.ind = TRUE)[1]]
-    startdate <- as.charater.Date(startdate, format = "%d/%m/%Y")
+    startdate <- as.character.Date(startdate, format = "%d/%m/%Y")
 
   }
   return(startdate)
