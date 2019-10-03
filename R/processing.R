@@ -14,7 +14,7 @@ startpick <- function(data = micemat , weight = 90){
   for (row in seq_along(1:nrow(dat))) {
     startdate[row] <- colnames(dat)[which(dat[row, ] >= 90,
                                           arr.ind = TRUE)[1]]
-    startdate <- as.Date(startdate)
+    startdate <- as.charater.Date(startdate, format = "%d/%m/%Y")
 
   }
   return(startdate)
@@ -32,6 +32,8 @@ startpick <- function(data = micemat , weight = 90){
 #' @export
 exprun <- function(start = begin, curdate = Sys.Date()) {
   # (TODO) : what if an animal has been culled before the current date?
+  start <- as.Date(start, format = "%d/%m/%Y")
+  curdate <- as.Date(curdate, format = "%d/%m/%Y")
   treatment_time <- curdate - start
   return(as.vector(treatment_time))
 }

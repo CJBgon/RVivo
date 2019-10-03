@@ -36,9 +36,8 @@ tumcalc <- function(volumes) {
     sizedat <- cbind(sizedat,bar)
     micematrix <- as.matrix(sizedat[, -c(1:3)])
     col <- colnames(micematrix)
-    colnames(micematrix) <- as.character(
-      as.Date(
-        col, format ="%d/%m/%Y"))
+    colnames(micematrix) <- as.character.Date(
+        col, format ="%d/%m/%Y")
   }
   return(micematrix)
 }
@@ -59,8 +58,7 @@ dataprep <- function(file) {
   micedata <- data.table::fread(file)
   micematrix <- as.matrix(micedata[, -c(1:3)])
   col <- colnames(micematrix)
-  colnames(micematrix) <- as.character(
-    as.Date(
-      col, format ="%d/%m/%Y"))
+  colnames(micematrix) <- as.character.Date(
+      col, format ="%d/%m/%Y")
   return(micematrix)
 }

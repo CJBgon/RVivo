@@ -52,7 +52,7 @@ mainvivo <- function(volumes = NULL,
        or height and width data (measures)")
   }
 
-col <- as.Date(colnames(micemat))
+col <- colnames(micemat)
 first <- startpick(data = micemat, weight = minvol)
 treatmenttime <- exprun(start = first, curdate = Sys.Date())
 tumourgrowth <- tumgrowth(matrix = micemat, startdate = first)
