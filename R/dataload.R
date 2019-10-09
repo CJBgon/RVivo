@@ -9,7 +9,34 @@
 #' @return volume in mm3.
 #' @export
 calcsize <- function(x, y) {
-  (x * y^2 * pi) / 6
+
+  size <- (x * y^2 * pi) / 6
+  return (size)
+}
+#' calculate sphere volume
+#'
+#' This function takes height and width of a tumour and calculates the
+#' area. Some lisences require this parameter to decide if an animal requires
+#' to be culled.
+#'
+#' @param x widght of a tumour in mm.
+#' @param y height of a tumour in mm.
+#' @param type either "square" or "circle".
+#' @return area in mm2.
+#' @export
+calcarea <- function(x, y, type = "square") {
+
+  if (type == "square")
+  {
+    area <- x * y
+  }else if (type == "circle" ){
+    if (x < 0.5*y && x > 1.5*y){
+      warning("x and y of tumour differ more then 50%, perhaps the tumour area
+      is not circular.")
+    }
+    largest <- sort(c(x,y),decreasing = TRUE)[1]
+    area <- pi*largest^2
+  }
 }
 
 #' create tumour volume matrix
@@ -54,6 +81,7 @@ tumcalc <- function(volumes) {
 #'  measurement date (columns).
 #' @export
 dataprep <- function(file) {
+
   # returns a matrix of the volumetric data, with dates as column names.
   micedata <- data.table::fread(file)
   micematrix <- as.matrix(micedata[, -c(1:3)])

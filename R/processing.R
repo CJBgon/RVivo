@@ -9,12 +9,13 @@
 #' @return vector of start dates.
 #' @export
 startpick <- function(data = micemat , weight = 90){
+
   startdate <- c()
   dat <- data
   for (row in seq_along(1:nrow(dat))) {
     startdate[row] <- colnames(dat)[which(dat[row, ] >= 90,
                                           arr.ind = TRUE)[1]]
-    startdate <- as.character.Date(startdate, format = "%d/%m/%Y")
+    startdate <- as.character.Date(startdate, format = "%Y-%m-%d")
 
   }
   return(startdate)
@@ -31,16 +32,17 @@ startpick <- function(data = micemat , weight = 90){
 #' @return A vector of days.
 #' @export
 exprun <- function(start = begin, curdate = Sys.Date()) {
+
   # (TODO) : what if an animal has been culled before the current date?
-  start <- as.Date(start, format = "%d/%m/%Y")
-  curdate <- as.Date(curdate, format = "%d/%m/%Y")
+  start <- as.Date(start, format = "%Y-%m-%d")
+  curdate <- as.Date(curdate, format = "%Y-%m-%d")
   treatment_time <- curdate - start
   return(as.vector(treatment_time))
 }
 
 #' tumour growth
 #'
-#'This function grabs the earliest measured tumour size sinds experiment start
+#' This function grabs the earliest measured tumour size sinds experiment start
 #' and substracts the last measured tumour size.
 #'
 #' @param matrix matrix of the format: rows = mice, columns = dates,
@@ -50,6 +52,7 @@ exprun <- function(start = begin, curdate = Sys.Date()) {
 #' @return A vector of difference in tumour size.
 #' @export
 tumgrowth <- function(matrix = micematrix, startdate = begin) {
+
   # grabs the earliest measured tumour size above 90 mm and
   # substracts the last measured tumour size.
   #
@@ -85,7 +88,7 @@ tumgrowth <- function(matrix = micematrix, startdate = begin) {
   }
   endweight <- unlist(endweight, use.names = F)
   #calculate tumour size difference.
-  g <- startweight - endweight
+  g <- endweight - startweight
   return(g)
 }
 
@@ -104,14 +107,90 @@ exptime <- function(volumematrix = micematrix, datecolumn = col ){
    # calculate the days between time points.
   intervalcount <- ncol(volumematrix)-1
   int <- c()
-  coldate <- as.Date(datecolumn, format = "%d/%m/%Y")
+  coldate <- as.Date(datecolumn, format = "%Y-%m-%d")
   for (i in seq_along(1: intervalcount)){
-    print(coldate[i+1])
-    print(coldate[i])
     int[i] <- coldate[i + 1] - coldate[i]
   }
   return(int)
 }
+
+#' matrix gap fill.
+#'
+#' Before we can plot anything we need to know how the data looks with days
+#' between measurements included, we do this by filling in the missing columns
+#' using this function.
+#'
+#'
+#' @param data matrix of the format: rows = mice, columns = dates,
+#' fill = tumour volume.
+#' @param intervaltime  Vector of the length in days of each interval between
+#' two measurements.
+#' @param datecolumn A vector of dates of tumour measurement.
+#' @return a matrix where every column is a day, if no measurements were made
+#' that day the column is filled with NA.
+#' @export
+filldate <- function(data, intervaltime, datecolumn = col){
+  coldate <- as.Date(datecolumn, format = "%Y-%m-%d")
+  alldays <- seq(coldate[1], length=explength+1, by="+1 day")
+  explength <- sum(int)
+  newmat<-matrix(ncol = length(alldays), nrow = nrow(micemat))
+  matchdates<- match(coldate,alldays)
+  for (i in seq_along(1:ncol(micemat))){
+    colu<-matchdates[i]
+    newmat[,colu]<-micemat[,i]
+  }
+  colnames(newmat) <- as.character(alldays)
+  return(newmat)
+}
+
+#' experimental matrix setup
+#'
+#' This function creates a matrix of the tumour size per date with all data
+#' starting at the experimental start point. e.g., the first column is
+#' experiment day 1 for all mice.
+#'
+#'
+#' @param filledmatrix matrix of the format: rows = mice, columns = dates,
+#' fill = tumour volume. This function does not allow columns to be skipped.
+#' each day must be represented as a column.
+#' @param intervaltime  Vector of the length in days of each interval between
+#' two measurements.
+#' @param startdate Start date of the animal/experiment.
+#' As calculated by startpick
+#' @return A matrix where the first column is day 1 of experiment. column names
+#'  are days since onset experiment, columns are different mice.
+#' @export
+plotmatrix <- function(filledmatrix = micematrix,
+                       startdate = first,
+                       intervaltime = int) {
+  miceDT <- as.data.table(filledmatrix)
+  end <- ncol(filledmatrix)
+  plotmat <- matrix(ncol = end)
+  alldays <- as.Date(colnames(filledmatrix), format = "%Y-%m-%d")
+  for (i in seq_along(1:length(startdate))) {
+  index <- match(as.Date(startdate[2], format = "%Y-%m-%d"), alldays)
+  # cycle over the begin dates,
+  # as this vector corresponds to each row in the matrix.
+  row <- miceDT[i ,c(index:end), with = F]
+  # fill up remaining space with NA.
+  row <- c(unlist(row), rep(NA, times = (index-1)))
+  plotmat <- rbind(plotmat, row)
+  }
+  plotmat <- plotmat[-1, ]
+  # dont need this anymore, could be a usefull snippet to create interval collnames from.
+  # x <- c()
+  # z <- c()
+  # for ( i in seq_along(1:length(int))) {
+
+  #   z <-sum(int[1:i])
+  #   x <- c(x, z)
+  #   y<- c(1, (x))
+  # }
+
+  colnames(plotmat) <- c(1:length(alldays))
+  return(plotmat)
+}
+
 
 #' growth over intervals
 #'
@@ -127,7 +206,7 @@ exptime <- function(volumematrix = micematrix, datecolumn = col ){
 growthinterval <- function(volumematrix = micematrix, datecolumn = col) {
 
   intervalcount <- ncol(volumematrix)-1
-  coldate <- as.Date(datecolumn, format = "%d/%m/%Y")
+  coldate <- as.Date(datecolumn, format = "%Y-%m-%d")
   # for each mice calculate if there as growth or remission in that timeframe.
   intgrowth <- matrix(nrow = nrow(volumematrix), ncol = intervalcount)
 
@@ -136,7 +215,7 @@ growthinterval <- function(volumematrix = micematrix, datecolumn = col) {
 
     for (i in seq_along(1 : intervalcount)) {
       x <- i+1
-      intgrowth[n, i] <- volumematrix[n , i] - volumematrix[n, x]
+      intgrowth[n, i] <- volumematrix[n , x] - volumematrix[n, i]
       # you could make a heatmap of this or use it for different plotting purposes.
 
     }
@@ -165,6 +244,7 @@ growthinterval <- function(volumematrix = micematrix, datecolumn = col) {
 #' counts for each mice.
 #' @export
 growthindicator <- function(intermatrix = intgrowth, intervaltime = int){
+
   # sum the days of growth vs days of remission per mice.
   growthsum <- apply(intermatrix, MARGIN = 1, function(x){
     pos  <- 0
@@ -187,6 +267,6 @@ growthindicator <- function(intermatrix = intgrowth, intervaltime = int){
     ret <- rbind(ret, temp)
 
   })
-  rownames(growthsum)<- c("growth", "remissiom", "stable")
+  rownames(growthsum)<- c("growth", "remission", "stable")
   return(growthsum)
 }
