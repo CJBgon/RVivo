@@ -130,9 +130,10 @@ exptime <- function(volumematrix = micematrix, datecolumn = col ){
 #' that day the column is filled with NA.
 #' @export
 filldate <- function(data, intervaltime, datecolumn = col){
-  coldate <- as.Date(datecolumn, format = "%Y-%m-%d")
+
+  coldate <- as.Date.character(datecolumn, format = "%Y-%m-%d")
+  explength <- sum(intervaltime)
   alldays <- seq(coldate[1], length=explength+1, by="+1 day")
-  explength <- sum(int)
   newmat<-matrix(ncol = length(alldays), nrow = nrow(micemat))
   matchdates<- match(coldate,alldays)
   for (i in seq_along(1:ncol(micemat))){
