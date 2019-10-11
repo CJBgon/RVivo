@@ -117,6 +117,7 @@ vivoplot_overall <- function(data, colours, error = T, dots = T) {
 vivoplot_treatment <- function(data, colours = colour, line = T) {
   # dots only
   if(line == F){
+
     treatplot <- ggplot2::ggplot(data = data,
             aes(x = variable,
             y = value,
@@ -131,6 +132,7 @@ vivoplot_treatment <- function(data, colours = colour, line = T) {
       labs(x = "days", y = "Tumour size (mm3)")
   }else {
   treatplot <- ggplot2::ggplot(data = data, aes(x = variable,
+
                                 y = value,
                                 color = Treatment,
                                 group = unID)) +

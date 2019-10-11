@@ -77,6 +77,7 @@ rvivo <- function(volumes = NULL,
   Ex <- exclude(filledmat = filledmat, culdat = culdat)
   excl_experimentmat <-experimentmat[!Ex]
 
+
   results <- cbind.data.frame(frame,
                               first,
                               treatmenttime,
@@ -144,7 +145,5 @@ rvivo <- function(volumes = NULL,
   }
 return(results)
 }
-
-
 
 
