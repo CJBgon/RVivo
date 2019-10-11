@@ -87,6 +87,6 @@ dataprep <- function(file) {
   micematrix <- as.matrix(micedata[, -c(1:3)])
   col <- colnames(micematrix)
   colnames(micematrix) <- as.character.Date(
-      col, format ="%d/%m/%Y")
+      col, format ="%Y-%m-%d")
   return(micematrix)
 }

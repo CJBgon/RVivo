@@ -129,16 +129,16 @@ exptime <- function(volumematrix = micematrix, datecolumn = col ){
 #' @return a matrix where every column is a day, if no measurements were made
 #' that day the column is filled with NA.
 #' @export
-filldate <- function(data, intervaltime, datecolumn = col){
+filldate <- function(data, intervaltime, datecolumn = colnam){
 
-  coldate <- as.Date.character(datecolumn, format = "%Y-%m-%d")
+  coldate <- as.Date(datecolumn, format = "%Y-%m-%d")
   explength <- sum(intervaltime)
   alldays <- seq(coldate[1], length=explength+1, by="+1 day")
-  newmat<-matrix(ncol = length(alldays), nrow = nrow(micemat))
+  newmat<-matrix(ncol = length(alldays), nrow = nrow(data))
   matchdates<- match(coldate,alldays)
-  for (i in seq_along(1:ncol(micemat))){
+  for (i in seq_along(1:ncol(data))){
     colu<-matchdates[i]
-    newmat[,colu]<-micemat[,i]
+    newmat[,colu]<-data[,i]
   }
   colnames(newmat) <- as.character(alldays)
   return(newmat)
@@ -169,7 +169,7 @@ plotmatrix <- function(filledmatrix = micematrix,
   plotmat <- matrix(ncol = end)
   alldays <- as.Date(colnames(filledmatrix), format = "%Y-%m-%d")
   for (i in seq_along(1:length(startdate))) {
-  index <- match(as.Date(startdate[2], format = "%Y-%m-%d"), alldays)
+  index <- match(as.Date(startdate[i], format = "%Y-%m-%d"), alldays)
   # cycle over the begin dates,
   # as this vector corresponds to each row in the matrix.
   row <- miceDT[i ,c(index:end), with = F]
@@ -270,4 +270,32 @@ growthindicator <- function(intermatrix = intgrowth, intervaltime = int){
   })
   rownames(growthsum)<- c("growth", "remission", "stable")
   return(growthsum)
+}
+
+#' Exclude mice
+#'
+#' This function determines which mice to exclude from the study. I does this
+#' by checking if a mice which lack entry data in the final measurement has
+#' got a date of death.
+#'
+#' @param filledmatrix matrix of the format: rows = mice, columns = dates,
+#' fill = tumour volume. This function does not allow columns to be skipped.
+#' each day must be represented as a column.
+#' @param culdat A dataframe which contains the date of death of each mice.
+#' expected format is: 1. Cage, 2. Treatment, 3. Mice ID, 4. Date of death in
+#' format %d/%m/%Y.
+#'
+#' @return a TRUE/FALSE vector which indicates if a mice should be excluded or
+#' not.
+#' @export
+exclude <- function(filledmat, culdat){
+  lastdat <- filledmat[,ncol(filledmat)]
+  end <- as.Date(culdat[[4]], format = "%d/%m/%Y")
+  excl <- c()
+  for (i in seq_along(1:length(end))){
+    if(is.na(end[i]) && is.na(lastdat[i])){
+      excl[i]<-TRUE
+    }else {excl[i] <- FALSE}
+  }
+  return(excl)
 }

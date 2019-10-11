@@ -4,7 +4,7 @@
 \alias{filldate}
 \title{matrix gap fill.}
 \usage{
-filldate(data, intervaltime, datecolumn = col)
+filldate(data, intervaltime, datecolumn = colnam)
 }
 \arguments{
 \item{data}{matrix of the format: rows = mice, columns = dates,

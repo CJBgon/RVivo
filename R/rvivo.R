@@ -29,23 +29,26 @@
 #' summary file: in_vivo_summary.csv and figures.
 #' @export
 rvivo <- function(volumes = NULL,
-                    measures = NULL,
-                    minvol = NULL,
-                    treatcolours = NULL,
-                    colstyle = "Dark2",
-                    figures = FALSE,
-                    table = TRUE,
-                    output = getwd()) {
+                  measures = NULL,
+                  cul = NULL,
+                  minvol = NULL,
+                  treatcolours = NULL,
+                  colstyle = "Dark2",
+                  figures = FALSE,
+                  table = TRUE,
+                  output = getwd()) {
   setwd(output)
 
   if(hasArg(measures) & is.null(volumes)) {
     # volume do volume calculations first and use that matrix as input.
     micemat <- tumcalc(measures)
+    culdat <- data.table::fread(cul)
     frame <- data.table::fread(file= measures, select = c(1:3))
   }else if (is.null(volumes) & hasArg(measures)) {
     #read pre-calulated volumes and use that matrix as input.
     micemat <- dataprep(volumes)
     frame <- data.table::fread(file = volumes, select = c(1:3))
+    culdat <- data.table::fread(cul)
   } else if (hasArg(measures) & hasArg(volumes)) {
     stop("please provide either tumour measurements or pre-calculated volumes,
        not both.")
@@ -53,26 +56,37 @@ rvivo <- function(volumes = NULL,
     stop("Provide either precalculated tumour volumes (volumes),
        or height and width data (measures)")
   }
-
   # create table out.
-  col <- colnames(micemat)
+  colnam <- colnames(micemat)
   first <- startpick(data = micemat, weight = minvol)
-  treatmenttime <- exprun(start = first, curdate = Sys.Date())
+  treatmenttime <- exprun(start = first, curdate = last(colnam))
   tumourgrowth <- tumgrowth(matrix = micemat, startdate = first)
-  experimentinterval <- exptime(volumematrix = micemat, datecolumn = col)
+  experimentinterval <- exptime(volumematrix = micemat, datecolumn = colnam)
   #interval matrix should only include from experiment start, and indicate treatment days.
   # intervalmatrix <- growthinterval(volumematrix = micemat, datecolumn = col)
   # tumoursum <- growthindicator(intermatrix = intervalmatrix,
   #                             intervaltime = experimentinterval )
+  filledmat <- filldate(data = micemat,
+                        intervaltime = experimentinterval,
+                        datecolumn = colnam)
+  plotmat <- plotmatrix(filledmatrix = filledmat,
+                        startdate = first,
+                        intervaltime = experimentinterval)
+  experimentmat <- cbind(frame, plotmat)
+
+  Ex <- exclude(filledmat = filledmat, culdat = culdat)
+  excl_experimentmat <-experimentmat[!Ex]
+
 
   results <- cbind.data.frame(frame,
                               first,
                               treatmenttime,
                               tumourgrowth,
-                              intervalmatrix,
-                              t(tumoursum))
+                              plotmat)
+  ex_results <- results[!Ex]
+
   if (table == T) {
-  data.table::fwrite(x = results,
+  data.table::fwrite(x = ex_results,
                      file = paste0(output, "/in_vivo_summary.csv"),
                      sep =",",
                      col.names=T,
@@ -80,12 +94,8 @@ rvivo <- function(volumes = NULL,
   }
   if (figures == T) {
     # plot growth over time.
-    filledmat <- filldate(data = micemat, intervaltime = int)
-    plotmat <- plotmatrix(filledmatrix = filledmat,
-               startdate = first,
-               intervaltime = int)
-    experimentmat <- cbind(frame, plotmat)
-    plotgrowth <- plotdat(experimentmat, date = F)
+
+    plotgrowth <- plotdat(excl_experimentmat, date = F)
       if(is.null(treatcolours)){
     colour <- colourpick(vars = frame$Treatment, colourtype = colstyle)
       } else {
@@ -96,10 +106,10 @@ rvivo <- function(volumes = NULL,
                                       line = T,
                                       colours = colour
                                       )
-    ggsave(filename= paste0(Sys.Date(), "_rvivo_growthplot.pdf"),
+    ggplot2::ggsave(filename= paste0(Sys.Date(), "_rvivo_growthplot.pdf"),
            plot = growthplots, device = "pdf",
-           width = 12,
-           height = 8,
+           width = 24,
+           height = 16,
            units = "cm")
 
 
@@ -135,8 +145,5 @@ rvivo <- function(volumes = NULL,
   }
 return(results)
 }
-
-
-
 
 

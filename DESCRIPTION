@@ -1,6 +1,6 @@
 Package: Rvivo
 Title: Rvivo Takes tumour measerements and performs data analysis.
-Version: 0.0.1.0000
+Version: 0.9.0.0000
 Authors@R: 
     person(given = "Christian",
            family = "Bouwens",

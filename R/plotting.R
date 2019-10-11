@@ -18,7 +18,7 @@ colourpick<-function(vars, colourtype = "Dark2"){
     colsop<- c("#f0f0f0", "#1e1e1e", "#bdbdbd", "#636363")
     cols <- colsop[1:le]
   } else {
-    cols <- brewer.pal(le, colourtype)
+    cols <- RColorBrewer::brewer.pal(le, colourtype)
   }
   names(cols) <-levels(fac)
   return(cols)
@@ -45,7 +45,7 @@ plotdat <- function(data, date=FALSE){
                  USE.NAMES = F)
   unID <- sub(unID, pattern = " ", replacement = "")
   undata <- cbind(unID, data)
-  meltgrowth <- melt(undata, id.vars = c(1:4))
+  meltgrowth <- data.table::melt(undata, id.vars = c(1:4))
   meltgrowth_use <- meltgrowth[!is.na(meltgrowth$value)]
   meltgrowth_use$value <- as.numeric(meltgrowth_use$value)
 
@@ -76,7 +76,7 @@ plotdat <- function(data, date=FALSE){
 #' @export
 vivoplot_overall <- function(data, colours, error = T, dots = T) {
   #plot tumour size over time
-  plot1 <- ggplot(data, aes(y = value, x = variable)) +
+  plot1 <- ggplot2::ggplot(data, aes(y = value, x = variable)) +
     scale_fill_manual(values=colours)+
     scale_colour_manual(name = "Treatment", values = colours)+
     stat_summary(aes(color = Treatment), fun.y=mean, geom="line") +
@@ -117,7 +117,8 @@ vivoplot_overall <- function(data, colours, error = T, dots = T) {
 vivoplot_treatment <- function(data, colours = colour, line = T) {
   # dots only
   if(line == F){
-    treatplot <- ggplot(data = data,
+
+    treatplot <- ggplot2::ggplot(data = data,
             aes(x = variable,
             y = value,
             color = Treatment,
@@ -130,12 +131,13 @@ vivoplot_treatment <- function(data, colours = colour, line = T) {
       scale_colour_manual(name = "Treatment", values = colours)+
       labs(x = "days", y = "Tumour size (mm3)")
   }else {
-  treatplot <- ggplot(data = data, aes(x = variable,
+  treatplot <- ggplot2::ggplot(data = data, aes(x = variable,
+
                                 y = value,
                                 color = Treatment,
                                 group = unID)) +
     # geom_point(stat = 'identity') +
-    geom_line(aes(x = as.numeric(variable), y = value,)) +
+    geom_line(aes(x = as.numeric(variable), y = value)) +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     facet_wrap(~Treatment)+

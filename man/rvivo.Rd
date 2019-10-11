@@ -4,7 +4,7 @@
 \alias{rvivo}
 \title{main function of Rvivo}
 \usage{
-rvivo(volumes = NULL, measures = NULL, minvol = NULL,
+rvivo(volumes = NULL, measures = NULL, cul = NULL, minvol = NULL,
   treatcolours = NULL, colstyle = "Dark2", figures = FALSE,
   table = TRUE, output = getwd())
 }
