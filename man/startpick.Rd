@@ -4,13 +4,13 @@
 \alias{startpick}
 \title{picks experiment start date}
 \usage{
-startpick(data = micemat, weight = 90)
+startpick(data = micemat, threshold = 90)
 }
 \arguments{
 \item{data}{matrix of the format: rows = mice, columns = dates,
 fill = tumour volume.}
 
-\item{weight}{weight above which the animal is ready for treatment.}
+\item{threshold}{weight above which the animal is ready for treatment.}
 }
 \value{
 vector of start dates.

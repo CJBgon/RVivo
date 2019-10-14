@@ -1,6 +1,6 @@
 Package: Rvivo
 Title: Rvivo Takes tumour measerements and performs data analysis.
-Version: 0.9.0.0000
+Version: 0.9.1.0000
 Authors@R: 
     person(given = "Christian",
            family = "Bouwens",
@@ -12,5 +12,5 @@ License: MIT
 Encoding: UTF-8
 LazyData: true
 Depends: data.table
-Imports: ggplot2, RColorBrewer
+Imports: ggplot2, RColorBrewer, survival, survminer
 RoxygenNote: 6.1.1

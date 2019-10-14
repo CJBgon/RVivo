@@ -5,28 +5,33 @@
 \title{main function of Rvivo}
 \usage{
 rvivo(volumes = NULL, measures = NULL, cul = NULL, minvol = NULL,
-  treatcolours = NULL, colstyle = "Dark2", figures = FALSE,
-  table = TRUE, output = getwd())
+  treatcolours = NULL, colstyle = "Dark2", figures = TRUE,
+  table = TRUE, survival = TRUE, output = getwd())
 }
 \arguments{
-\item{volumes}{A table with three columns of sample data
-(e.g. Cage, treatment, mice tag) and following columns of tumour volumes
-in mm3. Column names should be in format day/month/Year, e.gg.01/01/2020.}
+\item{volumes}{A table with three columns of sample information
+(e.g. Cage, treatment, mice tag) and subsequent columns of tumour volumes
+in mm3. Column names should be in format Year-month-day, e.gg.2020-01-01.}
 
-\item{measures}{A table with three columns of sample data
-(e.g. Cage, treatment, mice tag) and following columns of Height and Width
+\item{measures}{A table with three columns of sample information
+(e.g. Cage, treatment, mice tag) and subsequent columns of Height and Width
 in side by side columns, both with the date of measurement as column name.}
 
 \item{minvol}{minimum volume of the tumour before animal can start treatment
 (default = 90)}
 
 \item{figures}{TRUE/FALSE, Indicates if  Rvivo generates plots.
-(WIP, default = FALSE)}
+(default = TRUE)}
 
 \item{table}{TRUE/FALSE, Inidcates if Rvivo outputs a table with results.
 (default = TRUE)}
 
 \item{output}{The folder Rvivo will ouptut to. (default = Working directory)}
+
+\item{measures}{A table with four columns, the firs three are the same
+information as measures or volumes. the fourth column contains the date if
+death for each culled animal. live animals, or animals which died because
+of external reasons should be left blank.}
 }
 \value{
 A data.frame of three columns (growth, remission, stable) with

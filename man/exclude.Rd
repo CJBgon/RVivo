@@ -16,7 +16,7 @@ fill = tumour volume. This function does not allow columns to be skipped.
 each day must be represented as a column.}
 }
 \value{
-a TRUE/FALSE vector which indicates if a mice should be excluded or
+A TRUE/FALSE vector which indicates if a mice should be excluded or
 not.
 }
 \description{

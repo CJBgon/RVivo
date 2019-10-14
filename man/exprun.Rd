@@ -4,10 +4,10 @@
 \alias{exprun}
 \title{experiment time}
 \usage{
-exprun(start = begin, curdate = Sys.Date())
+exprun(startdate = begin, curdate = Sys.Date())
 }
 \arguments{
-\item{start}{Start date of the animal/experiment. As calculated by startpick}
+\item{startdate}{Start date of the animal/experiment. As calculated by startpick}
 
 \item{curdate}{The current date, or the date at which point the
 experiment ended.}

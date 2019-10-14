@@ -51,6 +51,7 @@ calcarea <- function(x, y, type = "square") {
 #' (width) in the second.
 #' @return A matrix of tumour volumes per mice (rows) for each
 #'  measurement date (columns).
+#' @import data.table
 #' @export
 tumcalc <- function(volumes) {
   vols <- data.table::fread(volumes)
@@ -79,6 +80,7 @@ tumcalc <- function(volumes) {
 #' tumour volume on that day. e.g. 01-01-2020 | 02-01-2020
 #' @return A matrix of tumour volumes per mice (rows) for each
 #'  measurement date (columns).
+#' @import data.table
 #' @export
 dataprep <- function(file) {
 
