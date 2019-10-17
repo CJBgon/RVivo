@@ -10,23 +10,30 @@
 #'
 #' provide either volumes or measures, not both.
 #'
-#' @param volumes A table with three columns of sample data
-#' (e.g. Cage, treatment, mice tag) and following columns of tumour volumes
-#' in mm3. Column names should be in format day/month/Year, e.gg.01/01/2020.
-#' @param measures A table with three columns of sample data
-#' (e.g. Cage, treatment, mice tag) and following columns of Height and Width
+#' @param volumes A table with three columns of sample information
+#' (e.g. Cage, treatment, mice tag) and subsequent columns of tumour volumes
+#' in mm3. Column names should be in format Year-month-day, e.g. 2020-01-01.
+#' @param measures A table with three columns of sample information
+#' (e.g. Cage, treatment, mice tag) and subsequent columns of Height and Width
 #' in side by side columns, both with the date of measurement as column name.
 #' @param minvol minimum volume of the tumour before animal can start treatment
 #'  (default = 90)
 #' @param figures TRUE/FALSE, Indicates if  Rvivo generates plots.
-#'  (WIP, default = FALSE)
+#'  (default = TRUE)
+#' @param axis "linear" or "log", passes on axis infomation for the plots.
 #' @param table TRUE/FALSE, Inidcates if Rvivo outputs a table with results.
+#'  (default = TRUE)
+#' @param survival TRUE/FALSE, inidcates if Rvivo outputs Kaplan-meier
+#' survival curves.
 #'  (default = TRUE)
 #' @param output The folder Rvivo will ouptut to. (default = Working directory)
 #'
 #' @return A data.frame of three columns (growth, remission, stable) with
 #' counts for each mice. and depending on table & figures, optionally a
 #' summary file: in_vivo_summary.csv and figures.
+#' @import data.table
+#' @import ggplot2
+#' @importFrom methods hasArg
 #' @export
 rvivo <- function(volumes = NULL,
                   measures = NULL,
@@ -34,35 +41,43 @@ rvivo <- function(volumes = NULL,
                   minvol = NULL,
                   treatcolours = NULL,
                   colstyle = "Dark2",
-                  figures = FALSE,
+                  figures = TRUE,
+                  axis = "linear",
                   table = TRUE,
+                  survival = TRUE,
                   output = getwd()) {
   setwd(output)
 
-  if(hasArg(measures) & is.null(volumes)) {
+  if (hasArg(measures) & is.null(volumes)) {
     # volume do volume calculations first and use that matrix as input.
     micemat <- tumcalc(measures)
-    culdat <- data.table::fread(cul)
-    frame <- data.table::fread(file= measures, select = c(1:3))
-  }else if (is.null(volumes) & hasArg(measures)) {
+    frame <- data.table::fread(file= measures,sep = ",",
+                               sep2 = "\t", select = c(1:3))
+  } else if (is.null(measures) & hasArg(volumes)) {
     #read pre-calulated volumes and use that matrix as input.
     micemat <- dataprep(volumes)
-    frame <- data.table::fread(file = volumes, select = c(1:3))
-    culdat <- data.table::fread(cul)
+    frame <- data.table::fread(file= volumes,sep = ",",
+                               sep2 = "\t", select = c(1:3))
   } else if (hasArg(measures) & hasArg(volumes)) {
     stop("please provide either tumour measurements or pre-calculated volumes,
        not both.")
-  } else  {
+  } else {
     stop("Provide either precalculated tumour volumes (volumes),
        or height and width data (measures)")
   }
+
+  if (hasArg(cul)) {
+    culdat <- data.table::fread(cul, fill = TRUE, sep=",", na.strings = "")
+  } else {
+    stop("survival = TRUE but no cul provided.")
+  }
+
   # create table out.
   colnam <- colnames(micemat)
-  first <- startpick(data = micemat, weight = minvol)
+  first <- startpick(data = micemat, threshold = minvol)
   treatmenttime <- exprun(start = first, curdate = last(colnam))
   tumourgrowth <- tumgrowth(matrix = micemat, startdate = first)
   experimentinterval <- exptime(volumematrix = micemat, datecolumn = colnam)
-  #interval matrix should only include from experiment start, and indicate treatment days.
   # intervalmatrix <- growthinterval(volumematrix = micemat, datecolumn = col)
   # tumoursum <- growthindicator(intermatrix = intervalmatrix,
   #                             intervaltime = experimentinterval )
@@ -76,8 +91,6 @@ rvivo <- function(volumes = NULL,
 
   Ex <- exclude(filledmat = filledmat, culdat = culdat)
   excl_experimentmat <-experimentmat[!Ex]
-
-
   results <- cbind.data.frame(frame,
                               first,
                               treatmenttime,
@@ -92,35 +105,27 @@ rvivo <- function(volumes = NULL,
                      col.names=T,
                      row.names=F)
   }
+
+  if (is.null(treatcolours)) {
+    colour <- colourpick(vars = frame[[2]], colourtype = colstyle)
+  } else {
+    colour <- treatcolours
+  }
+
   if (figures == T) {
     # plot growth over time.
 
     plotgrowth <- plotdat(excl_experimentmat, date = F)
-      if(is.null(treatcolours)){
-    colour <- colourpick(vars = frame$Treatment, colourtype = colstyle)
-      } else {
-        colour <- treatcolours
-      }
-
     growthplots <- vivoplot_treatment(data = plotgrowth,
                                       line = T,
-                                      colours = colour
+                                      colours = colour,
+                                      ax = axis
                                       )
     ggplot2::ggsave(filename= paste0(Sys.Date(), "_rvivo_growthplot.pdf"),
            plot = growthplots, device = "pdf",
            width = 24,
            height = 16,
            units = "cm")
-
-
-    # (TODO)
-    # interval plots?
-
-    # add subscription plotting.R
-
-    # incorporperate mice survival data.
-
-
 
 
     # plot growth without error bars.
@@ -136,14 +141,27 @@ rvivo <- function(volumes = NULL,
     #                                        cols = colour,
     #                                         error = F,
     #                                         dots = T)
-
-    # plot barplots of growth per each interval.
-    # int_dat <- cbind(frame, intervalmatrix)
-    # plotint <- plotdat(int_dat, date = F)
-
-
   }
-return(results)
+
+  if (survival == TRUE && is.null(culdat)) {
+    stop("When trying to calculate survival data no survival data found.
+         Has `cull` been provided?")
+  } else if (survival == TRUE && !is.null(culdat)) {
+    survivaldata <- survdata(startdate = first,
+                             treatmenttime = treatmenttime,
+                             culdat = culdat)
+    excl_survivaldata <- survivaldata[!Ex]
+    survivalplot <- survdataplot(survivaldat = excl_survivaldata,
+                                 colours = colour)
+    ggplot2::ggsave(filename= paste0(Sys.Date(), "_rvivo_survival.pdf"),
+                    plot = print(survivalplot), device = "pdf",
+                    width = 24,
+                    height = 16,
+                    units = "cm")
+  }
+  return(ex_results)
 }
+
+
 
 

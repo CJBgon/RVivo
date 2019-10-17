@@ -26,14 +26,15 @@ calcsize <- function(x, y) {
 #' @export
 calcarea <- function(x, y, type = "square") {
 
-  if (type == "square")
-  {
+  if (type == "square") {
     area <- x * y
-  }else if (type == "circle" ){
-    if (x < 0.5*y && x > 1.5*y){
+  } else if (type == "circle" ) {
+
+    if (x < 0.5*y && x > 1.5*y) {
       warning("x and y of tumour differ more then 50%, perhaps the tumour area
       is not circular.")
     }
+
     largest <- sort(c(x,y),decreasing = TRUE)[1]
     area <- pi*largest^2
   }
@@ -44,16 +45,17 @@ calcarea <- function(x, y, type = "square") {
 #' This function reads an input file containing  height and width data and
 #' returns a matrix with rows = mice and columns = dates of measurement.
 #'
-#' @param volumes A table with the first 3 columns indicating sample data:
+#' @param measure_data A table with the first 3 columns indicating sample data:
 #' cage, treatment, mouse/repeat. The remaining columns are dates with the
 #' height and width measurements. e.g. 01-01-2020 | 01-01-2020.
 #' Make sure the heigher value (height) is in the first column and the lower
 #' (width) in the second.
 #' @return A matrix of tumour volumes per mice (rows) for each
 #'  measurement date (columns).
+#' @import data.table
 #' @export
-tumcalc <- function(volumes) {
-  vols <- data.table::fread(volumes)
+tumcalc <- function(measure_data) {
+  vols <- data.table::fread(measure_data)
   voluse <- vols[, -c(1:3)]
   sizedat <- vols[, c(1:3)]
   for (i in seq(1, ncol(voluse), by=2)) {
@@ -64,8 +66,9 @@ tumcalc <- function(volumes) {
     micematrix <- as.matrix(sizedat[, -c(1:3)])
     col <- colnames(micematrix)
     colnames(micematrix) <- as.character.Date(
-        col, format ="%d/%m/%Y")
+        col, tryFormats = c("%d/%m/%Y", "%Y-%m-%d", "%Y/%m/%d"))
   }
+  micematrix[micematrix < 0] <- 0
   return(micematrix)
 }
 
@@ -79,6 +82,7 @@ tumcalc <- function(volumes) {
 #' tumour volume on that day. e.g. 01-01-2020 | 02-01-2020
 #' @return A matrix of tumour volumes per mice (rows) for each
 #'  measurement date (columns).
+#' @import data.table
 #' @export
 dataprep <- function(file) {
 
@@ -87,6 +91,8 @@ dataprep <- function(file) {
   micematrix <- as.matrix(micedata[, -c(1:3)])
   col <- colnames(micematrix)
   colnames(micematrix) <- as.character.Date(
-      col, format ="%Y-%m-%d")
+      col, tryFormats = c("%d/%m/%Y", "%Y-%m-%d", "%Y/%m/%d"))
+  micematrix[micematrix < 0] <- 0
+
   return(micematrix)
 }
