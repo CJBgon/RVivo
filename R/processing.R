@@ -15,9 +15,9 @@ startpick <- function(data = micemat , threshold = 90){
   for (row in seq_along(1:nrow(dat))) {
     startdate[row] <- colnames(dat)[which(dat[row, ] >= threshold,
                                           arr.ind = TRUE)[1]]
-    startdate <- as.character.Date(startdate, format = "%Y-%m-%d")
-
   }
+  startdate <- as.Date(startdate, tryFormats = c("%d/%m/%Y",
+                                                 "%Y-%m-%d"))
   return(startdate)
 }
 
@@ -33,11 +33,12 @@ startpick <- function(data = micemat , threshold = 90){
 #' @export
 exprun <- function(startdate = begin, curdate = Sys.Date()) {
 
-  # (TODO) : what if an animal has been culled before the current date?
-  start <- as.Date(startdate, format = "%Y-%m-%d")
-  curdate <- as.Date(curdate, format = "%Y-%m-%d")
+  start <- startdate
+  curdate <- as.Date(curdate, tryFormats = c("%d/%m/%Y",
+                                             "%Y-%m-%d",
+                                             "%Y/%m/%d"))
   treatment_time <- curdate - start
-  return(as.vector(treatment_time))
+  return(treatment_time)
 }
 
 #' tumour growth
@@ -63,6 +64,9 @@ tumgrowth <- function(matrix = micematrix, startdate = begin) {
   #
   # Returns: a vector with size differences per mice.
   miceDT <- as.data.table(matrix)
+  colnames(miceDT) <- as.character(as.Date.character(colnames(matrix),
+                                        tryFormats = c("%d/%m/%Y",
+                                                       "%Y-%m-%d")))
   startweight <- c()
   endweight <- c()
   #grab the tumour size on the start day
@@ -107,7 +111,9 @@ exptime <- function(volumematrix = micematrix, datecolumn = col ){
    # calculate the days between time points.
   intervalcount <- ncol(volumematrix)-1
   int <- c()
-  coldate <- as.Date(datecolumn, format = "%Y-%m-%d")
+  coldate <- as.Date(datecolumn, tryFormats = c("%d/%m/%Y",
+                                                "%Y-%m-%d",
+                                                "%Y/%m/%d"))
   for (i in seq_along(1: intervalcount)){
     int[i] <- coldate[i + 1] - coldate[i]
   }
@@ -131,7 +137,9 @@ exptime <- function(volumematrix = micematrix, datecolumn = col ){
 #' @export
 filldate <- function(data, intervaltime, datecolumn = colnam){
 
-  coldate <- as.Date(datecolumn, format = "%Y-%m-%d")
+  coldate <- as.Date(datecolumn, tryFormats = c("%d/%m/%Y",
+                                                "%Y-%m-%d",
+                                                "%Y/%m/%d"))
   explength <- sum(intervaltime)
   alldays <- seq(coldate[1], length=explength+1, by="+1 day")
   newmat<-matrix(ncol = length(alldays), nrow = nrow(data))
@@ -167,9 +175,13 @@ plotmatrix <- function(filledmatrix = micematrix,
   miceDT <- as.data.table(filledmatrix)
   end <- ncol(filledmatrix)
   plotmat <- matrix(ncol = end)
-  alldays <- as.Date(colnames(filledmatrix), format = "%Y-%m-%d")
+  alldays <- as.Date(colnames(filledmatrix), tryFormats = c("%d/%m/%Y",
+                                                            "%Y-%m-%d",
+                                                            "%Y/%m/%d"))
   for (i in seq_along(1:length(startdate))) {
-  index <- match(as.Date(startdate[i], format = "%Y-%m-%d"), alldays)
+  index <- match(as.Date(startdate[i], tryFormats = c("%d/%m/%Y",
+                                                      "%Y-%m-%d",
+                                                      "%Y/%m/%d")), alldays)
   # cycle over the begin dates,
   # as this vector corresponds to each row in the matrix.
   row <- miceDT[i ,c(index:end), with = F]
@@ -207,7 +219,9 @@ plotmatrix <- function(filledmatrix = micematrix,
 growthinterval <- function(volumematrix = micematrix, datecolumn = col) {
 
   intervalcount <- ncol(volumematrix)-1
-  coldate <- as.Date(datecolumn, format = "%Y-%m-%d")
+  coldate <- as.Date(datecolumn, tryFormats = c("%d/%m/%Y",
+                                                "%Y-%m-%d",
+                                                "%Y/%m/%d"))
   # for each mice calculate if there as growth or remission in that timeframe.
   intgrowth <- matrix(nrow = nrow(volumematrix), ncol = intervalcount)
 
@@ -288,14 +302,16 @@ growthindicator <- function(intermatrix = intgrowth, intervaltime = int){
 #' @return A TRUE/FALSE vector which indicates if a mice should be excluded or
 #' not.
 #' @export
-exclude <- function(filledmat, culdat){
+exclude <- function(filledmat, culdat) {
   lastdat <- filledmat[,ncol(filledmat)]
-  end <- as.Date(culdat[[4]], format = "%d/%m/%Y")
+  end <- as.character.Date(culdat[[4]], tryFormats = c("%d/%m/%Y",
+                                             "%Y-%m-%d",
+                                             "%Y/%m/%d"))
   excl <- c()
-  for (i in seq_along(1:length(end))){
-    if(is.na(end[i]) && is.na(lastdat[i])){
+  for (i in seq_along(1:length(end))) {
+    if (is.na(end[i]) && is.na(lastdat[i])) {
       excl[i]<-TRUE
-    }else {excl[i] <- FALSE}
+    } else {excl[i] <- FALSE}
   }
   return(excl)
 }
@@ -316,24 +332,27 @@ exclude <- function(filledmat, culdat){
 #' @return a table with the Treatment, survival time and binary survival
 #' indication (1 = death, 0 = alive).
 #' @export
-survdata <- function(startdate, treatmenttime, culdat){
-  start <- as.Date(startdate)
-  end <- as.Date(culdat[[4]], format = "%d/%m/%Y")
+survdata <- function(startdate, treatmenttime, culdat) {
+  start <- startdate
+  end <- as.Date(culdat[[4]], tryFormats = c("%d/%m/%Y",
+                                             "%Y-%m-%d",
+                                             "%Y/%m/%d"))
   frame <- culdat[,c(1:3)]
   censored <- is.na(end)
-  survtime <- end - start
+  survtime <- (end - start)
 
   for (i in seq_along(1:length(censored))) {
-    if(censored[i]){
+    if (censored[i]) {
       survtime[i] <- treatmenttime[i]
     }
   }
-  binarysurvi <- sapply(censored, function(z){
-    if(z == FALSE){1}else
-      if(z == TRUE){0}
+  binarysurvi <- sapply(censored, function(z) {
+    if (z == FALSE) {1} else
+      if (z == TRUE) {0}
   }, USE.NAMES = F, simplify = T)
 
   survivaldat <- cbind(frame[,2], survtime, binarysurvi)
+  colnames(survivaldat) <- c("Treatment", "survtime", "binarysurvi")
 
   return(survivaldat)
 }

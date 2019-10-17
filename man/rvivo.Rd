@@ -6,12 +6,12 @@
 \usage{
 rvivo(volumes = NULL, measures = NULL, cul = NULL, minvol = NULL,
   treatcolours = NULL, colstyle = "Dark2", figures = TRUE,
-  table = TRUE, survival = TRUE, output = getwd())
+  axis = "linear", table = TRUE, survival = TRUE, output = getwd())
 }
 \arguments{
 \item{volumes}{A table with three columns of sample information
 (e.g. Cage, treatment, mice tag) and subsequent columns of tumour volumes
-in mm3. Column names should be in format Year-month-day, e.gg.2020-01-01.}
+in mm3. Column names should be in format Year-month-day, e.g. 2020-01-01.}
 
 \item{measures}{A table with three columns of sample information
 (e.g. Cage, treatment, mice tag) and subsequent columns of Height and Width
@@ -23,15 +23,16 @@ in side by side columns, both with the date of measurement as column name.}
 \item{figures}{TRUE/FALSE, Indicates if  Rvivo generates plots.
 (default = TRUE)}
 
+\item{axis}{"linear" or "log", passes on axis infomation for the plots.}
+
 \item{table}{TRUE/FALSE, Inidcates if Rvivo outputs a table with results.
 (default = TRUE)}
 
-\item{output}{The folder Rvivo will ouptut to. (default = Working directory)}
+\item{survival}{TRUE/FALSE, inidcates if Rvivo outputs Kaplan-meier
+survival curves.
+ (default = TRUE)}
 
-\item{measures}{A table with four columns, the firs three are the same
-information as measures or volumes. the fourth column contains the date if
-death for each culled animal. live animals, or animals which died because
-of external reasons should be left blank.}
+\item{output}{The folder Rvivo will ouptut to. (default = Working directory)}
 }
 \value{
 A data.frame of three columns (growth, remission, stable) with

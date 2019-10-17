@@ -4,10 +4,10 @@
 \alias{tumcalc}
 \title{create tumour volume matrix}
 \usage{
-tumcalc(volumes)
+tumcalc(measure_data)
 }
 \arguments{
-\item{volumes}{A table with the first 3 columns indicating sample data:
+\item{measure_data}{A table with the first 3 columns indicating sample data:
 cage, treatment, mouse/repeat. The remaining columns are dates with the
 height and width measurements. e.g. 01-01-2020 | 01-01-2020.
 Make sure the heigher value (height) is in the first column and the lower
