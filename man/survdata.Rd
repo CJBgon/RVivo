@@ -15,7 +15,7 @@ they were eligble for the experiment.}
 
 \item{culdat}{A dataframe which contains the date of death of each mice.
 expected format is: 1. Cage, 2. Treatment, 3. Mice ID, 4. Date of death in
-format %d/%m/%Y.}
+format day/month/Year.}
 }
 \value{
 a table with the Treatment, survival time and binary survival

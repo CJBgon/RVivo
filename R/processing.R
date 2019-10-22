@@ -292,12 +292,12 @@ growthindicator <- function(intermatrix = intgrowth, intervaltime = int){
 #' by checking if a mice which lack entry data in the final measurement has
 #' got a date of death.
 #'
-#' @param filledmatrix matrix of the format: rows = mice, columns = dates,
+#' @param filledmat matrix of the format: rows = mice, columns = dates,
 #' fill = tumour volume. This function does not allow columns to be skipped.
 #' each day must be represented as a column.
 #' @param culdat A dataframe which contains the date of death of each mice.
 #' expected format is: 1. Cage, 2. Treatment, 3. Mice ID, 4. Date of death in
-#' format %d/%m/%Y.
+#' format day/month/Year.
 #'
 #' @return A TRUE/FALSE vector which indicates if a mice should be excluded or
 #' not.
@@ -327,7 +327,7 @@ exclude <- function(filledmat, culdat) {
 #' they were eligble for the experiment.
 #' @param culdat A dataframe which contains the date of death of each mice.
 #' expected format is: 1. Cage, 2. Treatment, 3. Mice ID, 4. Date of death in
-#' format %d/%m/%Y.
+#' format day/month/Year.
 #'
 #' @return a table with the Treatment, survival time and binary survival
 #' indication (1 = death, 0 = alive).
