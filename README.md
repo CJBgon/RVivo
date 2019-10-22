@@ -84,5 +84,7 @@ rvivo(volumes = NULL,
       survival = TRUE,
       output = "/path/to/outputfolder")
 ```
+## Output
+Rvivo will output a table with the start date of each animal, the difference in tumour size from the beginning to the end of the treatment and tumour size over the course of the experiment. 
 
-Rvivo will output a table with the start date of each animal, the difference in tumour size from the beginning to the end of the treatment and tumour size over the course of the experiment. Additionally it will plot tumour growth over time for each animal as well as KM-survival curves. As luminesence follows a logaritmic scale the axis of the growth plots can be set to log-scale using axis = "log".
+Additionally it will plot tumour growth over time for each animal as well as KM-survival curves. As luminesence follows a logaritmic scale the axis of the growth plots can be set to log-scale using axis = "log".
