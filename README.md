@@ -1,11 +1,4 @@
----
-title: "Rvivo"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Rvivo}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
+# Rvivo
 ## Introduction
 Rvivo has been written to simplify data analysis from in vivo experiments.
 *In vivo* experiments which involve treatment of mice start after a certain 
