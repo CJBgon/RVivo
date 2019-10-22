@@ -17,8 +17,19 @@ in mm3. Column names should be in format Year-month-day, e.g. 2020-01-01.}
 (e.g. Cage, treatment, mice tag) and subsequent columns of Height and Width
 in side by side columns, both with the date of measurement as column name.}
 
+\item{cul}{A table with three columns of sample information followed with
+the date a mice was culled. mice still undergoing treatment or those that
+have been excluded from the study should be left blank.}
+
 \item{minvol}{minimum volume of the tumour before animal can start treatment
 (default = 90)}
+
+\item{treatcolours}{For when you want to use the same colours per treatment
+over several images. Input should be a named vector with hex style colour
+codes. The names should correspond to the treatments in the data.}
+
+\item{colstyle}{Indicate the type of colour coding that should be assigned
+to each treatment group. follows RColorBrewer style. (default = "Dark2")}
 
 \item{figures}{TRUE/FALSE, Indicates if  Rvivo generates plots.
 (default = TRUE)}

@@ -7,13 +7,13 @@
 exclude(filledmat, culdat)
 }
 \arguments{
-\item{culdat}{A dataframe which contains the date of death of each mice.
-expected format is: 1. Cage, 2. Treatment, 3. Mice ID, 4. Date of death in
-format %d/%m/%Y.}
-
-\item{filledmatrix}{matrix of the format: rows = mice, columns = dates,
+\item{filledmat}{matrix of the format: rows = mice, columns = dates,
 fill = tumour volume. This function does not allow columns to be skipped.
 each day must be represented as a column.}
+
+\item{culdat}{A dataframe which contains the date of death of each mice.
+expected format is: 1. Cage, 2. Treatment, 3. Mice ID, 4. Date of death in
+format day/month/Year.}
 }
 \value{
 A TRUE/FALSE vector which indicates if a mice should be excluded or
