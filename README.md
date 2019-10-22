@@ -1,7 +1,7 @@
 # Rvivo
 ## Introduction
 Rvivo has been written to simplify data analysis from in vivo experiments using R 3.6.
-*In vivo* experiments start after a certain treshold has been reached, often as dictated by the animal license. Unfortunately,these start dates don't all occur on the same day as tumour growth is variable
+*In vivo* experiments start after a certain treshold has been reached, often as dictated by the animal license. Unfortunately, these start dates don't all occur on the same day as tumour growth is variable
 in mice. This means that most scientists work with error prone and complicated 
 excell sheets to allign all the data.
 
