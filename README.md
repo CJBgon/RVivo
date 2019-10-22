@@ -9,7 +9,7 @@ excell sheets to allign all the data.
 
 This package takes a simple comma (or tab) delimited file with three columns of
 sample information followed by either tumour measurements, tumour volumes or
-luminesence. together with an indication of the treshold given by the user it 
+luminesence. Together with an indication of the treshold given by the user it 
 selects experiment start days, determines the growth and survival over the course
 of the experiment. 
 
@@ -51,7 +51,7 @@ If no cull date has been entered the mice is presumed to be alive unless
 there are missing tumour measurements. At which point Rvivo presumes the mice
 has been culled due to reasons unrelated to the experiment and it will be excluded.
 
-Dates in the format : Year-month-day (2020-12-31) and day/month/year (31/12/2020) are supported.
+Dates in the format : year-month-day (2020-12-31) and day/month/year (31/12/2020) are supported.
 
 
 ```{r, include = FALSE}
@@ -87,4 +87,4 @@ rvivo(volumes = NULL,
 ## Output
 Rvivo will output a table with the start date of each animal, the difference in tumour size from the beginning to the end of the treatment and tumour size over the course of the experiment. 
 
-Additionally it will plot tumour growth over time for each animal as well as KM-survival curves. As luminesence follows a logaritmic scale the axis of the growth plots can be set to log-scale using axis = "log".
+Additionally, it will plot tumour growth over time for each animal as well as KM-survival curves. As luminesence follows a logaritmic scale the axis of the growth plots can be set to log-scale using axis = "log".
