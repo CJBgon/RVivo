@@ -55,7 +55,7 @@ calcarea <- function(x, y, type = "square") {
 #' @import data.table
 #' @export
 tumcalc <- function(measure_data) {
-  vols <- data.table::fread(measure_data)
+  vols <- data.table::fread(measure_data, header = TRUE)
   voluse <- vols[, -c(1:3)]
   sizedat <- vols[, c(1:3)]
   for (i in seq(1, ncol(voluse), by=2)) {
@@ -87,7 +87,7 @@ tumcalc <- function(measure_data) {
 dataprep <- function(file) {
 
   # returns a matrix of the volumetric data, with dates as column names.
-  micedata <- data.table::fread(file)
+  micedata <- data.table::fread(file, header = TRUE)
   micematrix <- as.matrix(micedata[, -c(1:3)])
   col <- colnames(micematrix)
   colnames(micematrix) <- as.character.Date(

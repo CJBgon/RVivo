@@ -302,7 +302,7 @@ growthindicator <- function(intermatrix = intgrowth, intervaltime = int){
 #' @return A TRUE/FALSE vector which indicates if a mice should be excluded or
 #' not.
 #' @export
-exclude <- function(filledmat, culdat) {
+  exclude <- function(filledmat, culdat) {
   lastdat <- filledmat[,ncol(filledmat)]
   end <- as.character.Date(culdat[[4]], tryFormats = c("%d/%m/%Y",
                                              "%Y-%m-%d",

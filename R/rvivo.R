@@ -59,13 +59,15 @@ rvivo <- function(volumes = NULL,
   if (hasArg(measures) & is.null(volumes)) {
     # volume do volume calculations first and use that matrix as input.
     micemat <- tumcalc(measures)
-    frame <- data.table::fread(file= measures,sep = ",",
-                               sep2 = "\t", select = c(1:3))
+    frame <- data.table::fread(file= measures,
+                               header = TRUE,
+                               select = c(1:3))
   } else if (is.null(measures) & hasArg(volumes)) {
-    #read pre-calulated volumes and use that matrix as input.
+    # read pre-calulated volumes and use that matrix as input.
     micemat <- dataprep(volumes)
-    frame <- data.table::fread(file= volumes,sep = ",",
-                               sep2 = "\t", select = c(1:3))
+    frame <- data.table::fread(file= volumes,
+                               header = TRUE,
+                               select = c(1:3))
   } else if (hasArg(measures) & hasArg(volumes)) {
     stop("please provide either tumour measurements or pre-calculated volumes,
        not both.")
@@ -75,11 +77,21 @@ rvivo <- function(volumes = NULL,
   }
 
   if (hasArg(cul)) {
-    culdat <- data.table::fread(cul, fill = TRUE, sep=",", na.strings = "")
+    culdat <- data.table::fread(cul, header = TRUE,
+                                fill = TRUE,
+                                na.strings = "")
   } else {
-    stop("survival = TRUE but no cul provided.")
+    stop("Please provide a cul argument.")
   }
 
+  # check input data, does it contain the right amount of columns?
+  if (ncol(culdat) != 4 || ncol(frame) != 3) {
+    stop(paste0("ERROR: Unexpected amount of columns ",
+                "in cul or volumes/measurements. ",
+                "\n\tPerhaps your Treatment column contains a lot of spaces ",
+                "or symbols that could be interpreted as delimiters?"))
+
+  }
   # create table out.
   colnam <- colnames(micemat)
   first <- startpick(data = micemat, threshold = minvol)
