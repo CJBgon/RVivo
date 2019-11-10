@@ -4,9 +4,10 @@
 \alias{rvivo}
 \title{main function of Rvivo}
 \usage{
-rvivo(volumes = NULL, measures = NULL, cul = NULL, minvol = NULL,
-  treatcolours = NULL, colstyle = "Dark2", figures = TRUE,
-  axis = "linear", table = TRUE, survival = TRUE, output = getwd())
+rvivo(volumes = NULL, measures = NULL, cul = NULL, min = 0,
+  max = NULL, treatcolours = NULL, colstyle = "Dark2",
+  figures = TRUE, axis = "linear", output = "pdf", table = TRUE,
+  survival = TRUE, folder = getwd())
 }
 \arguments{
 \item{volumes}{A table with three columns of sample information
@@ -21,8 +22,11 @@ in side by side columns, both with the date of measurement as column name.}
 the date a mice was culled. mice still undergoing treatment or those that
 have been excluded from the study should be left blank.}
 
-\item{minvol}{minimum volume of the tumour before animal can start treatment
-(default = 90)}
+\item{min}{minimum volume of the tumour before animal can start treatment
+(default = 0)}
+
+\item{max}{A value above which tumour entries will be removed from the
+analysis.}
 
 \item{treatcolours}{For when you want to use the same colours per treatment
 over several images. Input should be a named vector with hex style colour
@@ -36,14 +40,16 @@ to each treatment group. follows RColorBrewer style. (default = "Dark2")}
 
 \item{axis}{"linear" or "log", passes on axis infomation for the plots.}
 
-\item{table}{TRUE/FALSE, Inidcates if Rvivo outputs a table with results.
+\item{output}{image extension types: "tiff", "pdf".}
+
+\item{table}{TRUE/FALSE, Inidcates if Rvivo folders a table with results.
 (default = TRUE)}
 
-\item{survival}{TRUE/FALSE, inidcates if Rvivo outputs Kaplan-meier
+\item{survival}{TRUE/FALSE, inidcates if Rvivo folders Kaplan-meier
 survival curves.
  (default = TRUE)}
 
-\item{output}{The folder Rvivo will ouptut to. (default = Working directory)}
+\item{folder}{The folder Rvivo will ouptut to. (default = Working directory)}
 }
 \value{
 A data.frame of three columns (growth, remission, stable) with

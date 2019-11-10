@@ -4,12 +4,18 @@
 \alias{dataprep}
 \title{create tumour volume matrix}
 \usage{
-dataprep(file)
+dataprep(file, precolumns = 3, max = NULL)
 }
 \arguments{
 \item{file}{A table with the first 3 columns indicating sample data:
 cage, treatment, mouse/repeat. The remaining columns are dates with the
 tumour volume on that day. e.g. 01-01-2020 | 02-01-2020}
+
+\item{precolumns}{An numeric indicator how many columnes in the file
+before the volumetric data.}
+
+\item{max}{A value above which tumour entries will be removed from the
+analysis.}
 }
 \value{
 A matrix of tumour volumes per mice (rows) for each

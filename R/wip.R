@@ -1,10 +1,11 @@
 # rvivo_expsetup
-
+#culdatapeng <-  fread("~/Documents/Side_Projects/peng/culdata.csv")
+#volumedatapent<- fread( "~/Documents/Side_Projects/peng/tumoursize.csv")
 # development: ####################################################
-# micedat <- tumcalc("~/Documents/car/vol_mice_sheet2.csv")
-# col <- colnames(micedat)
-# start <- startpick(data = micedat, threshold = 90)
-# treatmenttime <- exprun(start = start, curdate = last(col))
+#micedat <- tumcalc("~/Documents/Side_Projects/peng/tumoursize.csv")
+#col <- colnames(micedat)
+#start <- startpick(data = micedat, threshold = 90)
+#treatmenttime <- exprun(startdate = start, curdate = last(col))
 # int <- exptime(volumematrix = micedat, datecolumn = col)
 # culdat <- fread("~/Documents/car/cul_mice_sheet2.csv", fill = T,na.strings = "" )
 # end <- as.Date(culdat[[4]], format = "%d/%m/%Y")
@@ -29,10 +30,10 @@
 
 # create function that takes mm2 and weight -> returns if an animal should be culled or not.
 
-# creates a function that gives a rough prediction of when an animal will
-# need to be culled from trend in mm2 gain and weight loss. (processing.R)
-
-# We need some sort of scaling y / x factor for the growthplots.
-
 # function(survstats) {}
+
+
+# incorporate culdata in volumes/measurements.
+
+# if no culdata has been given seperately try and extract it from volumes/measurements data.
 

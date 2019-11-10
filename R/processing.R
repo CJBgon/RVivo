@@ -96,6 +96,44 @@ tumgrowth <- function(matrix = micematrix, startdate = begin) {
   return(g)
 }
 
+#' cul date
+#'
+#' This function grabs the last measured tumour size and determines the date
+#' the animal died.
+#'
+#' @param matrix matrix of the format: rows = mice, columns = dates,
+#' fill = tumour volume.
+#' @return A vector with dates of death per animal, NA if the animal is alive.
+#' @export
+endcalc <- function(matrix = micematrix){
+
+  miceDT <- as.data.table(matrix)
+  colnames(miceDT) <- as.character(as.Date.character(colnames(matrix),
+                                                     tryFormats = c("%d/%m/%Y",
+                                                                    "%Y-%m-%d")))
+  endweight <- c()
+  enddate <- c()
+  #grab the last measurement of
+  for (n in seq_along(1 : nrow(miceDT))) { # go along the mice (rows)
+    DTle <- length(miceDT)
+    # DTle is the last entry of the matrix
+    endweight[n] <- miceDT[n, DTle, with = F]
+    if(is.na(endweight[n])) { #if the last entry of the matrix is NA
+      # go into while loop to return to the latest available value
+      while (is.na(endweight[n])) {
+        DTle <- DTle - 1
+        endweight[n] <- miceDT[n, DTle, with = F]
+      }
+    }
+    if (DTle == length(miceDT)) {
+      enddate[n] <- NA
+    } else{
+      enddate[n] <- colnames(miceDT[,DTle, with = F])
+    }
+  }
+  return(enddate)
+}
+
 #' measurement intervals
 #'
 #' This function calculates the interval in days between measurements
@@ -302,7 +340,7 @@ growthindicator <- function(intermatrix = intgrowth, intervaltime = int){
 #' @return A TRUE/FALSE vector which indicates if a mice should be excluded or
 #' not.
 #' @export
-  exclude <- function(filledmat, culdat) {
+exclude <- function(filledmat, culdat) {
   lastdat <- filledmat[,ncol(filledmat)]
   end <- as.character.Date(culdat[[4]], tryFormats = c("%d/%m/%Y",
                                              "%Y-%m-%d",
@@ -332,12 +370,11 @@ growthindicator <- function(intermatrix = intgrowth, intervaltime = int){
 #' @return a table with the Treatment, survival time and binary survival
 #' indication (1 = death, 0 = alive).
 #' @export
-survdata <- function(startdate, treatmenttime, culdat) {
+survdata <- function(startdate, treatmenttime, culdat, frame ) {
   start <- startdate
-  end <- as.Date(culdat[[4]], tryFormats = c("%d/%m/%Y",
+  end <- as.Date(culdat, tryFormats = c("%d/%m/%Y",
                                              "%Y-%m-%d",
                                              "%Y/%m/%d"))
-  frame <- culdat[,c(1:3)]
   censored <- is.na(end)
   survtime <- (end - start)
 

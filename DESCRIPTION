@@ -1,13 +1,13 @@
 Package: Rvivo
 Title: Rvivo Takes tumour measerements and performs data analysis
-Version: 0.9.1.5000
+Version: 0.9.2.0000
 Authors@R: 
     person(given = "Christian",
            family = "Bouwens",
            role = c("aut", "cre"),
            email = "c.j.bouwens@gmail.com",
            comment = c(ORCID = "0000-0002-5751-0365"))
-Description: Rvivo takes two types of input: 1. Tumour measurements (height x width) or 2. pre-calculated tumour volumes in mm3. input data expects 3 columns of sample data (Cage, Treatment, mouse ID) and dates as column names. Rvivo Currently returns a .csv file with the following columns: A treatment/experiment start point, as indicated from the date the tumour size exceded a certain threshold. The tumour growth from the treatment start to the last measurement. The growth of the tumour over each measurement interval. A summation of intervals where there was growth, remission or no change (stable) in tumour size. 
+Description: Rvivo takes two types of input: 1. Tumour measurements (height x width) or 2. pre-calculated tumour volumes in mm3. Input data expects 3 columns of sample data (Cage, Treatment, mouse ID) and dates as column names. Rvivo Currently returns a .csv file with the following columns: A treatment/experiment start point, as indicated from the date the tumour size exceded a certain threshold. The tumour growth from the treatment start to the last measurement. The growth of the tumour over each measurement interval. A summation of intervals where there was growth, remission or no change (stable) in tumour size. 
 License: MIT
 Encoding: UTF-8
 LazyData: true
