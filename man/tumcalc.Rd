@@ -4,7 +4,7 @@
 \alias{tumcalc}
 \title{create tumour volume matrix}
 \usage{
-tumcalc(measure_data)
+tumcalc(measure_data, precolumns = 3, max = NULL)
 }
 \arguments{
 \item{measure_data}{A table with the first 3 columns indicating sample data:
@@ -12,6 +12,11 @@ cage, treatment, mouse/repeat. The remaining columns are dates with the
 height and width measurements. e.g. 01-01-2020 | 01-01-2020.
 Make sure the heigher value (height) is in the first column and the lower
 (width) in the second.}
+
+\item{precolumns}{An numeric indicator how many columnes in the file
+before the volumetric data.
+#' @param max A value above which tumour entries will be removed from the
+analysis.}
 }
 \value{
 A matrix of tumour volumes per mice (rows) for each

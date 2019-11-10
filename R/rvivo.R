@@ -19,8 +19,10 @@
 #' @param cul A table with three columns of sample information followed with
 #' the date a mice was culled. mice still undergoing treatment or those that
 #' have been excluded from the study should be left blank.
-#' @param minvol minimum volume of the tumour before animal can start treatment
-#'  (default = 90)
+#' @param min minimum volume of the tumour before animal can start treatment
+#'  (default = 0)
+#' @param max A value above which tumour entries will be removed from the
+#' analysis.
 #' @param treatcolours For when you want to use the same colours per treatment
 #' over several images. Input should be a named vector with hex style colour
 #' codes. The names should correspond to the treatments in the data.
@@ -29,12 +31,13 @@
 #' @param figures TRUE/FALSE, Indicates if  Rvivo generates plots.
 #'  (default = TRUE)
 #' @param axis "linear" or "log", passes on axis infomation for the plots.
-#' @param table TRUE/FALSE, Inidcates if Rvivo outputs a table with results.
+#' @param output image extension types: "tiff", "pdf".
+#' @param table TRUE/FALSE, Inidcates if Rvivo folders a table with results.
 #'  (default = TRUE)
-#' @param survival TRUE/FALSE, inidcates if Rvivo outputs Kaplan-meier
+#' @param survival TRUE/FALSE, inidcates if Rvivo folders Kaplan-meier
 #' survival curves.
 #'  (default = TRUE)
-#' @param output The folder Rvivo will ouptut to. (default = Working directory)
+#' @param folder The folder Rvivo will ouptut to. (default = Working directory)
 #'
 #' @return A data.frame of three columns (growth, remission, stable) with
 #' counts for each mice. and depending on table & figures, optionally a
@@ -46,56 +49,85 @@
 rvivo <- function(volumes = NULL,
                   measures = NULL,
                   cul = NULL,
-                  minvol = NULL,
+                  min = 0,
+                  max = NULL,
                   treatcolours = NULL,
                   colstyle = "Dark2",
                   figures = TRUE,
                   axis = "linear",
+                  output = "pdf",
                   table = TRUE,
                   survival = TRUE,
-                  output = getwd()) {
-  setwd(output)
+                  folder = getwd()) {
 
-  if (hasArg(measures) & is.null(volumes)) {
-    # volume do volume calculations first and use that matrix as input.
-    micemat <- tumcalc(measures)
-    frame <- data.table::fread(file= measures,
-                               header = TRUE,
-                               select = c(1:3))
-  } else if (is.null(measures) & hasArg(volumes)) {
-    # read pre-calulated volumes and use that matrix as input.
-    micemat <- dataprep(volumes)
-    frame <- data.table::fread(file= volumes,
-                               header = TRUE,
-                               select = c(1:3))
-  } else if (hasArg(measures) & hasArg(volumes)) {
+  # check inputs:
+  if (hasArg(measures) & hasArg(volumes)) {
     stop("please provide either tumour measurements or pre-calculated volumes,
-       not both.")
-  } else {
+         not both.")
+  } else if (!hasArg(measures) & !hasArg(volumes)) {
     stop("Provide either precalculated tumour volumes (volumes),
-       or height and width data (measures)")
+         or height and width data (measures)")
   }
-
+  setwd(folder)
+  # input can be either [culdat + volumes or measures] or [volumes or measures]
+  # in which case the exclusion data should be a column in that data.
   if (hasArg(cul)) {
     culdat <- data.table::fread(cul, header = TRUE,
                                 fill = TRUE,
                                 na.strings = "")
-  } else {
-    stop("Please provide a cul argument.")
+    if (hasArg(measures) & is.null(volumes)) {
+        # volume do volume calculations first and use that matrix as input.
+        micemat <- tumcalc(measures, precolumns = 3, max = max)
+        frame <- data.table::fread(file= measures,
+                                   header = TRUE,
+                                   select = c(1:3))
+    } else if (is.null(measures) & hasArg(volumes)) {
+        # read pre-calulated volumes and use that matrix as input.
+        micemat <- dataprep(volumes, precolumns = 3, max = max)
+        frame <- data.table::fread(file= volumes,
+                                   header = TRUE,
+                                   select = c(1:3))
+    }
+  } else if (!hasArg(cul) & hasArg(measures) & !hasArg(volumes)) {
+      # try and extract cul from measures otherwise return stop error.
+    micemat <- tumcalc(measures, precolumns = 4, max = max)
+    frame <- data.table::fread(file= measures,
+                               header = TRUE,
+                               select = c(1:3))
+    Exdat <- data.table::fread(measures, header = TRUE,
+                                fill = TRUE,
+                                na.strings = "",
+                                select = c(4))
+    # If values have been excluded set the Ex to TRUE which corresponds to
+    # the exclude function
+    Ex <- ifelse(is.na(Exdat), yes = FALSE, no = TRUE)[,1]
+    culdat <- endcalc(micemat)
+  } else if(!hasArg(cul) & !hasArg(measures) & hasArg(volumes)) {
+      # try and extract cul from volumes otherwise return stop error
+    micemat <- dataprep(volumes, precolumns = 4, max = max)
+    frame <- data.table::fread(file= volumes,
+                               header = TRUE,
+                               select = c(1:3))
+    Exdat <- data.table::fread(volumes, header = TRUE,
+                               fill = TRUE,
+                               na.strings = "",
+                               select = c(4))
+    Ex <- ifelse(is.na(Exdat), FALSE, TRUE)[,1]
+    culdat <- endcalc(micemat)
   }
 
   # check input data, does it contain the right amount of columns?
-  if (ncol(culdat) != 4 || ncol(frame) != 3) {
+  if (ncol(frame) != 3) {
     stop(paste0("ERROR: Unexpected amount of columns ",
                 "in cul or volumes/measurements. ",
-                "\n\tPerhaps your Treatment column contains a lot of spaces ",
+                "\nPerhaps your Treatment column contains a lot of spaces ",
                 "or symbols that could be interpreted as delimiters?"))
-
   }
+
   # create table out.
   colnam <- colnames(micemat)
-  first <- startpick(data = micemat, threshold = minvol)
-  treatmenttime <- exprun(start = first, curdate = last(colnam))
+  first <- startpick(data = micemat, threshold = min)
+  treatmenttime <- exprun(startdate = first, curdate = last(colnam))
   tumourgrowth <- tumgrowth(matrix = micemat, startdate = first)
   experimentinterval <- exptime(volumematrix = micemat, datecolumn = colnam)
   # intervalmatrix <- growthinterval(volumematrix = micemat, datecolumn = col)
@@ -107,10 +139,24 @@ rvivo <- function(volumes = NULL,
   plotmat <- plotmatrix(filledmatrix = filledmat,
                         startdate = first,
                         intervaltime = experimentinterval)
+  percentmat <- apply(plotmat, 2, function(x){
+    (x/plotmat[,1])*100
+  })
   experimentmat <- cbind(frame, plotmat)
+  per_experimentmat <- cbind(frame, percentmat)
 
-  Ex <- exclude(filledmat = filledmat, culdat = culdat)
-  excl_experimentmat <-experimentmat[!Ex]
+
+  if (hasArg(cul)) {
+      Ex <- exclude(filledmat = filledmat, culdat = culdat)
+  }
+  if (!hasArg(cul) & all(Ex)) {
+    stop(paste0("ERROR: All data will be excluded",
+                "\nThe fourth column in your data should have an indicator (such as 'x'",
+                " or 'y'), only at mice excluded from the analysis."))
+  }
+  # if (is.matrix(Ex)) {Ex -> Ex[,1]}
+  excl_experimentmat <- experimentmat[!Ex]
+  per_experimentmat <- per_experimentmat[!Ex]
   results <- cbind.data.frame(frame,
                               first,
                               treatmenttime,
@@ -120,7 +166,7 @@ rvivo <- function(volumes = NULL,
 
   if (table == T) {
   data.table::fwrite(x = ex_results,
-                     file = paste0(output, "/in_vivo_summary.csv"),
+                     file = paste0(folder, "/in_vivo_summary.csv"),
                      sep =",",
                      col.names=T,
                      row.names=F)
@@ -139,14 +185,28 @@ rvivo <- function(volumes = NULL,
     growthplots <- vivoplot_treatment(data = plotgrowth,
                                       line = T,
                                       colours = colour,
-                                      ax = axis
-                                      )
-    ggplot2::ggsave(filename= paste0(Sys.Date(), "_rvivo_growthplot.pdf"),
-           plot = growthplots, device = "pdf",
-           width = 24,
-           height = 16,
-           units = "cm")
+                                      ax = axis)
 
+
+    per_plotgrowth <- plotdat(per_experimentmat, date = F)
+    per_growthplots <- vivoplot_treatment(data = per_plotgrowth,
+                                      line = T,
+                                      colours = colour,
+                                      ax = axis)
+    ggplot2::ggsave(filename= paste0(Sys.Date(),
+                                     "_rvivo_growthplot.",
+                                     output),
+                    plot = print(growthplots), device = output,
+                    width = 24,
+                    height = 16,
+                    units = "cm")
+    ggplot2::ggsave(filename= paste0(Sys.Date(),
+                                     "_rvivo_percentageplot.",
+                                     output),
+                    plot = print(per_growthplots), device = output,
+                    width = 24,
+                    height = 16,
+                    units = "cm")
 
     # plot growth without error bars.
     # growthplot_line <- vivoplot_overal(data = plotgrowth,
@@ -162,14 +222,16 @@ rvivo <- function(volumes = NULL,
     #                                         error = F,
     #                                         dots = T)
   }
-
-  if (survival == TRUE && is.null(culdat)) {
-    stop("When trying to calculate survival data no survival data found.
-         Has `cull` been provided?")
-  } else if (survival == TRUE && !is.null(culdat)) {
+  if (survival == TRUE) {
+    if (hasArg(cul)) {
+      DOD <- culdat[[4]]
+    } else {
+      DOD <- culdat
+    }
     survivaldata <- survdata(startdate = first,
                              treatmenttime = treatmenttime,
-                             culdat = culdat)
+                             culdat = culdat,
+                             frame = frame)
     excl_survivaldata <- survivaldata[!Ex]
     survivalplot <- survdataplot(survivaldat = excl_survivaldata,
                                  colours = colour)

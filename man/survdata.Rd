@@ -4,7 +4,7 @@
 \alias{survdata}
 \title{Mice survival data preparation}
 \usage{
-survdata(startdate, treatmenttime, culdat)
+survdata(startdate, treatmenttime, culdat, frame)
 }
 \arguments{
 \item{startdate}{Start date of the animal/experiment as calculated by
