@@ -70,13 +70,6 @@ has been culled due to reasons unrelated to the experiment and it will be exclud
 
 Dates in the format : Year-month-day (2020-12-31) and day/month/year (31/12/2020) are supported.
 
-
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
 ## Executing Rvivo
 Rvivo calculates tumour growth and survival over an experiment time. The 
 beginning and end of this experiment time are determined by combining the dates of measurement 
