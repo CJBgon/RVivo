@@ -52,7 +52,7 @@ calcarea <- function(x, y, type = "square") {
 #' (width) in the second.
 #' @param precolumns An numeric indicator how many columnes in the file
 #' before the volumetric data.
-#' #' @param max A value above which tumour entries will be removed from the
+#' @param max A value above which tumour entries will be removed from the
 #' analysis.
 #' @return A matrix of tumour volumes per mice (rows) for each
 #'  measurement date (columns).
@@ -60,8 +60,10 @@ calcarea <- function(x, y, type = "square") {
 #' @export
 tumcalc <- function(measure_data, precolumns = 3, max = NULL) {
   vols <- data.table::fread(measure_data, header = TRUE)
-  voluse <- vols[, -c(1:eval(precolumns)), with = F]
-  sizedat <- vols[, c(1:(eval(precolumns-1))), with = F]
+  # bugfix, remove rows where the first column is NA.
+  rem <- !is.na(vols[[(eval(precolumns+1))]])
+  voluse <- vols[rem, -c(1:eval(precolumns)), with = F]
+  sizedat <- vols[rem, c(1:(eval(precolumns-1))), with = F]
   for (i in seq(1, ncol(voluse), by=2)) {
 
     foo1 <- voluse[, c(i : (i + 1)), with = F]
@@ -99,7 +101,9 @@ dataprep <- function(file, precolumns = 3,  max=NULL) {
 
   # returns a matrix of the volumetric data, with dates as column names.
   micedata <- data.table::fread(file, header = TRUE)
-  micematrix <- as.matrix(micedata[, -c(1:eval(precolumns)), with = F])
+  # delete rows where the first entry is NA, in case excell added empty rows.
+  rem <- !is.na(micedata[[(eval(precolumns+1))]])
+  micematrix <- as.matrix(micedata[rem, -c(1:eval(precolumns)), with = F])
   col <- colnames(micematrix)
   colnames(micematrix) <- as.character.Date(
       col, tryFormats = c("%d/%m/%Y", "%Y-%m-%d", "%Y/%m/%d"))
