@@ -1,11 +1,12 @@
 # rvivo_expsetup
-#culdatapeng <-  fread("~/Documents/Side_Projects/peng/culdata.csv")
-#volumedatapent<- fread( "~/Documents/Side_Projects/peng/tumoursize.csv")
+# culdatapeng <-  fread("~/Documents/Side_Projects/peng/culdata.csv")
+# volumedatapent<- fread( "~/Documents/Side_Projects/peng/tumoursize.csv")
 # development: ####################################################
-#micedat <- tumcalc("~/Documents/Side_Projects/peng/tumoursize.csv")
-#col <- colnames(micedat)
-#start <- startpick(data = micedat, threshold = 90)
-#treatmenttime <- exprun(startdate = start, curdate = last(col))
+# micedat <- tumcalc("~/Documents/Side_Projects/Rvivo wip/FileforChrisnoulcers_empty.csv",
+#                    precolumns = 4, max = NULL)
+# col <- colnames(micedat)
+# start <- startpick(data = micedat, threshold = 90)
+# treatmenttime <- exprun(startdate = start, curdate = last(col))
 # int <- exptime(volumematrix = micedat, datecolumn = col)
 # culdat <- fread("~/Documents/car/cul_mice_sheet2.csv", fill = T,na.strings = "" )
 # end <- as.Date(culdat[[4]], format = "%d/%m/%Y")

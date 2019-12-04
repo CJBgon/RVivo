@@ -74,24 +74,24 @@ rvivo <- function(volumes = NULL,
   if (hasArg(cul)) {
     culdat <- data.table::fread(cul, header = TRUE,
                                 fill = TRUE,
-                                na.strings = "")
+                                 na.strings = "")
     if (hasArg(measures) & is.null(volumes)) {
         # volume do volume calculations first and use that matrix as input.
         micemat <- tumcalc(measures, precolumns = 3, max = max)
-        frame <- data.table::fread(file= measures,
+        frame <- data.table::fread(file = measures,
                                    header = TRUE,
                                    select = c(1:3))
     } else if (is.null(measures) & hasArg(volumes)) {
         # read pre-calulated volumes and use that matrix as input.
         micemat <- dataprep(volumes, precolumns = 3, max = max)
-        frame <- data.table::fread(file= volumes,
+        frame <- data.table::fread(file = volumes,
                                    header = TRUE,
                                    select = c(1:3))
     }
   } else if (!hasArg(cul) & hasArg(measures) & !hasArg(volumes)) {
       # try and extract cul from measures otherwise return stop error.
     micemat <- tumcalc(measures, precolumns = 4, max = max)
-    frame <- data.table::fread(file= measures,
+    frame <- data.table::fread(file = measures,
                                header = TRUE,
                                select = c(1:3))
     Exdat <- data.table::fread(measures, header = TRUE,
@@ -123,7 +123,14 @@ rvivo <- function(volumes = NULL,
                 "\nPerhaps your Treatment column contains a lot of spaces ",
                 "or symbols that could be interpreted as delimiters?"))
   }
+  # clean out empty rows at the bottom of frame.
+  remfram <- frame[, fifelse(Cage == '', FALSE, TRUE)]
+  # don't need the is.na() case unless fread gets changed. Right now empty
+  # character columns get read in as '' instead of NA. this is not the case
+  # for integers.
+  # remframe2 <- frame[, fifelse(is.na(Cage), TRUE, FALSE)]
 
+  frame <- frame[remfram, c(1:3)]
   # create table out.
   colnam <- colnames(micemat)
   first <- startpick(data = micemat, threshold = min)
@@ -155,6 +162,9 @@ rvivo <- function(volumes = NULL,
                 " or 'y'), only at mice excluded from the analysis."))
   }
   # if (is.matrix(Ex)) {Ex -> Ex[,1]}
+  # remove rows at the end of the input file (like we've done for frame.)
+  # this is only neccessary because excell might save empty ',,,,,,,,,,' rows.
+  Ex <- Ex[remfram]
   excl_experimentmat <- experimentmat[!Ex]
   per_experimentmat <- per_experimentmat[!Ex]
   results <- cbind.data.frame(frame,
@@ -182,7 +192,13 @@ rvivo <- function(volumes = NULL,
     # plot growth over time.
 
     plotgrowth <- plotdat(excl_experimentmat, date = F)
+    sumplot <- vivoplot_overall(data = plotgrowth,
+                                type = 'reg',
+                                colours = colour,
+                                )
+
     growthplots <- vivoplot_treatment(data = plotgrowth,
+                                      type = 'reg',
                                       line = T,
                                       colours = colour,
                                       ax = axis)
@@ -190,20 +206,34 @@ rvivo <- function(volumes = NULL,
 
     per_plotgrowth <- plotdat(per_experimentmat, date = F)
     per_growthplots <- vivoplot_treatment(data = per_plotgrowth,
-                                      line = T,
-                                      colours = colour,
-                                      ax = axis)
+                                          type = 'per',
+                                          line = T,
+                                          colours = colour,
+                                          ax = axis)
+
     ggplot2::ggsave(filename= paste0(Sys.Date(),
-                                     "_rvivo_growthplot.",
+                                     "_rvivo_sumplot.",
                                      output),
-                    plot = print(growthplots), device = output,
+                    plot = sumplot,
+                    device = output,
                     width = 24,
                     height = 16,
                     units = "cm")
+
+    ggplot2::ggsave(filename= paste0(Sys.Date(),
+                                     "_rvivo_growthplot.",
+                                     output),
+                    plot = growthplots,
+                    device = output,
+                    width = 24,
+                    height = 16,
+                    units = "cm")
+
     ggplot2::ggsave(filename= paste0(Sys.Date(),
                                      "_rvivo_percentageplot.",
                                      output),
-                    plot = print(per_growthplots), device = output,
+                    plot = per_growthplots,
+                    device = output,
                     width = 24,
                     height = 16,
                     units = "cm")
@@ -233,10 +263,17 @@ rvivo <- function(volumes = NULL,
                              culdat = culdat,
                              frame = frame)
     excl_survivaldata <- survivaldata[!Ex]
+    statistics <- survstats(survivaldat = excl_survivaldata)
+    data.table::fwrite(x = statistics,
+                       file = paste0(folder, "/survival_stats.csv"),
+                       sep =",",
+                       col.names=T,
+                       row.names=F)
     survivalplot <- survdataplot(survivaldat = excl_survivaldata,
                                  colours = colour)
-    ggplot2::ggsave(filename= paste0(Sys.Date(), "_rvivo_survival.pdf"),
-                    plot = print(survivalplot), device = "pdf",
+    ggplot2::ggsave(filename= paste0(Sys.Date(), "_rvivo_survival.", output),
+                    plot = print(survivalplot),
+                    device = output,
                     width = 24,
                     height = 16,
                     units = "cm")

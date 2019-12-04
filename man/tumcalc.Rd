@@ -14,8 +14,9 @@ Make sure the heigher value (height) is in the first column and the lower
 (width) in the second.}
 
 \item{precolumns}{An numeric indicator how many columnes in the file
-before the volumetric data.
-#' @param max A value above which tumour entries will be removed from the
+before the volumetric data.}
+
+\item{max}{A value above which tumour entries will be removed from the
 analysis.}
 }
 \value{
