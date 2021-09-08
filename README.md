@@ -8,11 +8,7 @@ Unfortunately, due to the unique growth rate of tumours these start dates
 don't all occur on the same day. This means that most scientists work with
 error prone and complicated excel sheets to allign all the data.
 
-This package takes a simple comma (or tab) delimited file with three columns of
-sample information followed by either tumour measurements (height and width),
-tumour volumes or luminesence. Together with an treshold given by the user it 
-selects experiment start days, determines the growth and survival over the course
-of the experiment. 
+This package takes a simple comma (or tab) delimited file to determine growth and survival curves and produces publication ready illustrations.
 
 ## Input data
 
